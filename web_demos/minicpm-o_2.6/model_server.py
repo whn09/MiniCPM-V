@@ -175,6 +175,7 @@ class StreamManager:
         self.clear()
 
     def merge_wav_files(self, input_bytes_list, output_file):
+        merge_wav_start = time.time()
         with wave.open(io.BytesIO(input_bytes_list[0]), 'rb') as wav:
             params = wav.getparams()
             n_channels, sampwidth, framerate, n_frames, comptype, compname = params
@@ -188,6 +189,8 @@ class StreamManager:
             for wav_bytes in input_bytes_list:
                 with wave.open(io.BytesIO(wav_bytes), 'rb') as wav:
                     output_wav.writeframes(wav.readframes(wav.getnframes()))
+        merge_wav_end = time.time()
+        print('merge wav time:', merge_wav_end-merge_wav_start)
 
     
     def is_timed_out(self):
@@ -358,12 +361,15 @@ class StreamManager:
                 
                 self.vad_sequence.append(audio_bytes)
                 if len(self.vad_sequence) < self.vad_sequence_length:
-                    # logger.info('length of vad_sequence is {}, insufficient'.format(self.vad_sequence_length))
+                    logger.info('length of vad_sequence is {}<{}, insufficient'.format(len(self.vad_sequence), self.vad_sequence_length))
                     return "done"
                 elif len(self.vad_sequence) > self.vad_sequence_length:
-                    # logger.info('length of vad_sequence exceeds {}'.format(self.vad_sequence_length))
+                    logger.info('length of vad_sequence exceeds {}>{}'.format(len(self.vad_sequence), self.vad_sequence_length))
                     self.vad_sequence.pop(0)
+                vad_check_audio_bytes_start = time.time()
                 self.vad_check_audio_bytes(audio_bytes, image, 16000)
+                vad_check_audio_bytes_end = time.time()
+                print('vad_check_audio_bytes time:', vad_check_audio_bytes_end-vad_check_audio_bytes_start)
 
                 return "done"
 
@@ -395,12 +401,15 @@ class StreamManager:
                 vad_threshold = 1 - self.customized_options['vad_threshold']
             else:
                 vad_threshold = 0.2
-                
+            print('dur_vad:', dur_vad, 'time_vad:', time_vad, 'vad_threshold:', vad_threshold, 'self.stream_started:', self.stream_started, 'self.vad_time:', self.vad_time)
+    
             if self.calculate_rms(input_audio_vad_path, sr) and dur_vad > 0.4:
+                print('In if')
                 if self.stream_started == False:
                     self.vad_time = time.time()
                     self.stream_started = True
             elif dur_vad < vad_threshold:
+                print('In elif')
                 if self.stream_started:
                     self.stream_started = False
                     if (time.time() - self.vad_time >= 0.6):
@@ -471,6 +480,8 @@ class StreamManager:
                         )
 
                 self.input_audio_id += 1
+                time_prefill_end = time.time()
+                print('prefill time:', time_prefill_end-time_prefill, 'self.input_audio_id:', self.input_audio_id)
             return True
 
         except Exception as e:
@@ -510,7 +521,6 @@ class StreamManager:
                 print('=== gen start: ', time.time() - time_gen)
                 first_time = True
                 temp_time = time.time()
-                temp_time1 = time.time()
                 with torch.inference_mode():
                     if self.stop_response:
                         self.generate_end()
@@ -542,7 +552,7 @@ class StreamManager:
                             except FileNotFoundError:
                                 print(f"File {output_audio_path} not found.")
                             temp_time1 = time.time()
-                            print('text: ', text)
+                            print('text: ', text, 'time:', temp_time1-temp_time)
                             yield base64.b64encode(audio_stream).decode('utf-8'), text
                             self.speaking_time_stamp += self.cycle_wait_time
                     except Exception as e:
@@ -632,12 +642,15 @@ async def stream(request: Request, uid: Optional[str] = Header(None)):
         if not isinstance(data, dict) or "messages" not in data:
             raise HTTPException(status_code=400, detail="Invalid request format")
 
+        # print('In /api/v1/stream: data=', data)
+
         # Process messages
         reason = ""
         for message in data["messages"]:
             if not isinstance(message, dict) or "role" not in message or "content" not in message:
                 raise HTTPException(status_code=400, detail="Invalid message format")
             reason = stream_manager.process_message(message)
+        print('In /api/v1/stream: reason=', reason)
 
         # Return response using uid from header
         response = {
@@ -684,6 +697,7 @@ async def websocket_stream(websocket: WebSocket,
            except json.JSONDecodeError:
                await websocket.send_json({"error": "Invalid JSON"})
                continue
+        #    print('request_data:', request_data)
 
            stream_manager.update_last_request_time()
            stream_manager.update_last_stream_time()

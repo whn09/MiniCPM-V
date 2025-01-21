@@ -55,7 +55,7 @@
     import { videoConfigList, voiceConfigList, voiceIdeasList, showIdeasList } from '@/enums';
     import { getChunkLength } from '@/utils';
     import { mergeBase64ToBlob } from './merge';
-    import WebSocketService from '@/utils/websocket';
+    import WebSocketClient from '@/utils/websocket';
     import { useI18n } from 'vue-i18n';
 
     const { t } = useI18n();

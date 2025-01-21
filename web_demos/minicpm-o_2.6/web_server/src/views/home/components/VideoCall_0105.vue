@@ -73,7 +73,7 @@
     import { videoIdeasList, videoConfigList, showIdeasList } from '@/enums';
     import { isMobile, maxCount, getChunkLength } from '@/utils';
     import { mergeBase64ToBlob } from './merge';
-    import WebSocketService from '@/utils/websocket';
+    import WebSocketClient from '@/utils/websocket';
     let ctrl = new AbortController();
     let socket = null;
     const audioData = ref({
@@ -185,7 +185,7 @@
                     socket.close();
                 }
                 socket = new WebSocketService(
-                    `/ws/stream${window.location.search}&uid=${getNewUserId()}&service=minicpmo-server`
+                    `/ws/stream?uid=${getNewUserId()}&service=minicpmo-server`
                 );
                 socket.connect();
                 initVideoStream('environment');

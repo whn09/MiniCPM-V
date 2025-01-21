@@ -59,7 +59,7 @@
     import { videoConfigList, voiceConfigList, voiceIdeasList, showIdeasList } from '@/enums';
     import { getChunkLength } from '@/utils';
     import { mergeBase64ToBlob } from './merge';
-    import WebSocketService from '@/utils/websocket';
+    import WebSocketClient from '@/utils/websocket';
 
     let ctrl = new AbortController();
     let socket = null;
@@ -153,15 +153,23 @@
                 if (socket) {
                     socket.close();
                 }
-                socket = new WebSocketService(
-                    `/ws/stream${window.location.search}&uid=${getNewUserId()}&service=minicpmo-server`
+                socket = new WebSocketClient(
+                    `/ws/stream?uid=${getNewUserId()}&service=minicpmo-server`
                 );
                 socket.connect();
                 // 建立连接后稍等一会儿再传送数据
-                startRecording();
-                if (localStorage.getItem('canStopByVoice') === 'true') {
-                    vadStart();
-                }
+                // startRecording();
+                // if (localStorage.getItem('canStopByVoice') === 'true') {
+                //     vadStart();
+                // }
+                socket.on('open', () => {
+                    console.log('WebSocket connected');
+                    // 连接成功后再开始录音
+                    startRecording();
+                    if (localStorage.getItem('canStopByVoice') === 'true') {
+                        vadStart();
+                    }
+                });
             })
             .catch(() => {});
     };
@@ -293,7 +301,12 @@
                         }
                     ]
                 };
-                socket.send(JSON.stringify(obj));
+                // socket.send(JSON.stringify(obj));
+                try{
+                    socket.send(JSON.stringify(obj));
+                } catch (error) {
+                    console.error('Failed to send audio data:', error);
+                }
                 socket.on('message', data => {
                     console.log('message: ', data);
                     delayTimestamp.value = +new Date() - timestamp;

@@ -74,7 +74,7 @@
     const { t, locale } = useI18n();
     const activeTab = ref(defaultType);
     const language = ref(localStorage.getItem('language') || 'zh');
-    const isWebSocket = false;
+    const isWebSocket = true;  // default: false
     const tabList = ref([
         {
             type: 'video',

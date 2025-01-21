@@ -71,7 +71,7 @@
     import { useI18n } from 'vue-i18n';
 
     const { t } = useI18n();
-    import WebSocketService from '@/utils/websocket';
+    import WebSocketClient from '@/utils/websocket';
 
     let ctrl = new AbortController();
     let socket = null;
