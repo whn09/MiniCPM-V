@@ -4,6 +4,7 @@
 # pip install -U packaging
 # pip install -r requirements_o2.6.txt
 # pip install flash_attn
+# pip install websockets
 
 # sudo amazon-linux-extras install epel -y
 # sudo yum-config-manager --enable epel
@@ -14,6 +15,8 @@
 
 # git lfs install
 # git clone https://huggingface.co/openbmb/MiniCPM-o-2_6
+
+# python web_demos/minicpm-o_2.6/chatbot_web_demo_o2.6.py --model MiniCPM-o-2_6
 
 python web_demos/minicpm-o_2.6/model_server.py --model MiniCPM-o-2_6
 
