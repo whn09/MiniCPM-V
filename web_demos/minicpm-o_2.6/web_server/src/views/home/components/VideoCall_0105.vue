@@ -184,7 +184,7 @@
                 if (socket) {
                     socket.close();
                 }
-                socket = new WebSocketService(
+                socket = new WebSocketClient(
                     `/ws/stream?uid=${getNewUserId()}&service=minicpmo-server`
                 );
                 socket.connect();
@@ -332,7 +332,11 @@
                 if (count === maxCount) {
                     count = 0;
                 }
-                socket.send(JSON.stringify(obj));
+                try{
+                    socket.send(JSON.stringify(obj));
+                } catch (error) {
+                    console.error('Failed to send audio data:', error);
+                }
                 socket.on('message', data => {
                     console.log('message: ', data);
                     delayTimestamp.value = +new Date() - timestamp;
