@@ -775,6 +775,19 @@ MiniCPM-o 2.6 可以通过多种方式轻松使用：(1) [llama.cpp](https://git
             <td>24.3</td>
         </tr>
         <tr>
+            <td nowrap="nowrap" align="left">VITA-1.5</td>
+            <td>8B</td>
+            <td>46.7</td>
+            <td>28.1</td>
+            <td>23.3</td>
+            <td>2.0</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+        </tr>
+        <tr>
             <td nowrap="nowrap" align="left">Moshi</td>
             <td>7B</td>
             <td>43.7</td>
@@ -1837,6 +1850,7 @@ pip install -r requirements_o2.6.txt
 
 python web_demos/minicpm-o_2.6/chatbot_web_demo_o2.6.py
 ```
+浏览器打开`http://localhost:8000/`，开始体验图文对话Chatbot.
 
 
 ## 推理

@@ -339,6 +339,27 @@ MiniCPM-o 2.6 can be easily used in various ways: (1) [llama.cpp](https://github
             <td>-</td>
         </tr>
         <tr>
+            <td nowrap="nowrap" align="left">VITA-1.5</td>
+            <td>8B</td>
+            <td>784</td>
+            <td>63.3</td>
+            <td>741</td>
+            <td>66.2</td>
+            <td>-</td>
+            <td>52.7</td>
+            <td>60.2</td>
+            <td>2328.1</td>
+            <td>76.8</td>
+            <td>79.2</td>
+            <td>52.6</td>
+            <td>44.6</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+        </tr>
+        <tr>
             <td nowrap="nowrap" align="left">DeepSeek-VL2-27B (4B)</td>
             <td>27B</td>
             <td>672</td>
@@ -514,6 +535,14 @@ Note: For proprietary models, we calculate token density based on the image enco
             <td colspan="6" align="left"><strong>Open-source</strong></td>
         </tr>
         <tr>
+            <td nowrap="nowrap" align="left">VITA-1.5</td>
+            <td>8B</td>
+            <td>45.0</td>
+            <td>-</td>
+            <td>-</td>
+            <td>56.1/58.7</td>
+        </tr>
+        <tr>
             <td nowrap="nowrap" align="left">LLaVA-NeXT-Interleave 14B</td>
             <td>14B</td>
             <td>52.6</td>
@@ -675,6 +704,19 @@ Note: For proprietary models, we calculate token density based on the image enco
             <td>22.9*</td>
             <td>17.4*</td>
         </tr>
+          <tr>
+            <td nowrap="nowrap" align="left">VITA-1.5</td>
+            <td>8B</td>
+            <td>2.16</td>
+            <td>-</td>
+            <td>8.4</td>
+            <td>3.4</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+        </tr>
         <tr>
             <td nowrap="nowrap" align="left">GLM-4-Voice-Base</td>
             <td>9B</td>
@@ -781,6 +823,19 @@ Note: For proprietary models, we calculate token density based on the image enco
             <td>897</td>
             <td>3.2</td>
             <td>24.3</td>
+        </tr>
+        <tr>
+            <td nowrap="nowrap" align="left">VITA-1.5</td>
+            <td>8B</td>
+            <td>46.7</td>
+            <td>28.1</td>
+            <td>23.3</td>
+            <td>2.0</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
         </tr>
         <tr>
             <td nowrap="nowrap" align="left">Moshi</td>
@@ -1852,6 +1907,7 @@ pip install -r requirements_o2.6.txt
 
 python web_demos/minicpm-o_2.6/chatbot_web_demo_o2.6.py
 ```
+Open `http://localhost:8000/` in browser and enjoy the vision mode chatbot.
 
 ## Inference
 
