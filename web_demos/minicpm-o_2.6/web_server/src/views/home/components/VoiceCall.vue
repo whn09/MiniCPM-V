@@ -235,7 +235,11 @@
         base64List.value = [];
         isReturnError.value = false;
         skipDisabled.value = true;
+        running.value = false;
+        stop.value = false;
         playing.value = false;
+        isFirstPiece.value = true;
+        isFirstReturn.value = true;
         audioDOM.pause();
         stopMessage();
         if (socket) {
@@ -249,6 +253,10 @@
             outputData.value[outputData.value.length - 1].audio = mergeBase64ToBlob(allVoice.value);
         }
         myvad && myvad.destroy();
+
+        // 清理音频数据
+        audioChunks = [];
+        allVoice.value = [];
     };
     const getStopValue = () => {
         return stop.value;

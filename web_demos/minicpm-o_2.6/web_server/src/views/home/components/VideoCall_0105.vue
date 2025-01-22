@@ -110,6 +110,7 @@
     const isFirstPiece = ref(true);
     const allVoice = ref([]);
     const callDisabled = ref(true);
+    
     const feedbackStatus = ref('');
     const curResponseId = ref('');
     const delayTimestamp = ref(0); // 当前发送片延时
@@ -180,7 +181,6 @@
                 setNewUserId();
                 buildConnect();
                 await delay(100);
-                initVideoStream('environment');
                 if (socket) {
                     socket.close();
                 }
@@ -188,10 +188,18 @@
                     `/ws/stream?uid=${getNewUserId()}&service=minicpmo-server`
                 );
                 socket.connect();
-                initVideoStream('environment');
-                if (localStorage.getItem('canStopByVoice') === 'true') {
-                    vadStart();
-                }
+                // initVideoStream('environment');
+                // if (localStorage.getItem('canStopByVoice') === 'true') {
+                //     vadStart();
+                // }
+                socket.on('open', () => {
+                    console.log('WebSocket connected');
+                    // 连接成功后再开始录音
+                    initVideoStream('environment');
+                    if (localStorage.getItem('canStopByVoice') === 'true') {
+                        vadStart();
+                    }
+                });
             })
             .catch(() => {});
     };
@@ -245,15 +253,14 @@
                     if (totalBufferLength >= chunkLength) {
                         // 合并到一个完整的数据数组，并裁剪成1秒钟
                         const mergedBuffer = mergeBuffers(audioChunks, totalBufferLength);
-                        const oneSecondBuffer = mergedBuffer.slice(0, audioContext.sampleRate);
-
+                        const oneSecondBuffer = mergedBuffer.slice(0, chunkLength);  // audioContext.sampleRate
                         // 保存并处理成WAV格式
                         addQueue(+new Date(), () => saveAudioChunk(oneSecondBuffer, +new Date()));
-
                         // 保留多余的数据备用
-                        audioChunks = [mergedBuffer.slice(audioContext.sampleRate)];
+                        audioChunks = [mergedBuffer.slice(chunkLength)];  // audioContext.sampleRate
                     }
                 };
+                
                 analyser.value = audioContext.createAnalyser();
                 // 将音频节点连接到分析器
                 audioSource.connect(analyser.value);
@@ -296,6 +303,7 @@
             const wavBlob = encodeWAV(buffer, audioContext.sampleRate);
             let reader = new FileReader();
             reader.readAsDataURL(wavBlob);
+
             reader.onloadend = async function () {
                 let base64data = reader.result.split(',')[1];
                 const imgBase64 = videoImage.value[videoImage.value.length - 1]?.src;
@@ -363,27 +371,33 @@
         return result;
     };
     const stopRecording = () => {
-        isCalling.value = false;
         clearInterval(interval.value);
         interval.value = null;
         if (audioRecorder && audioRecorder.state !== 'inactive') {
             audioRecorder.stop();
         }
+        destroyVideoStream();
+
+        isCalling.value = false;
         if (animationFrameId.value) {
             cancelAnimationFrame(animationFrameId.value);
         }
         if (audioContext && audioContext.state !== 'closed') {
             audioContext.close();
         }
-        destroyVideoStream();
+        ctrl.abort();
+        ctrl = new AbortController();
         taskQueue.value = [];
         audioPlayQueue.value = [];
         base64List.value = [];
-        ctrl.abort();
-        ctrl = new AbortController();
         isReturnError.value = false;
         skipDisabled.value = true;
+        running.value = false;
+        stop.value = false;
         playing.value = false;
+        isFirstPiece.value = true;
+        isFirstReturn.value = true;
+        count = 0;
         audioDOM?.pause();
         stopMessage();
         if (socket) {
@@ -397,6 +411,10 @@
             outputData.value[outputData.value.length - 1].audio = mergeBase64ToBlob(allVoice.value);
         }
         myvad && myvad.destroy();
+
+        // 清理音频数据
+        audioChunks = [];
+        allVoice.value = [];
     };
     // 建立连接
     const buildConnect = () => {
@@ -658,6 +676,7 @@
     // 当队列中任务数大于0时，开始处理队列中的任务
     const addQueue = (time, item) => {
         taskQueue.value.push({ func: item, time });
+        // console.log('taskQueue.value.length:', taskQueue.value.length, 'running.value:', running.value, 'item:', item, 'time:', time)
         if (taskQueue.value.length > 0 && !running.value) {
             running.value = true;
             processQueue();
